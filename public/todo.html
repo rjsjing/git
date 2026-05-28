@@ -41,35 +41,34 @@
   const list = document.getElementById('list');
   const search = document.getElementById('search');
   const stats = document.getElementById('stats');
-  const STORAGE_KEY = 'todo_items';
 
-  function load() {
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
-    catch { return []; }
+  async function request(method, path, body) {
+    const opts = { method, headers: {} };
+    if (body) {
+      opts.headers['Content-Type'] = 'application/json';
+      opts.body = JSON.stringify(body);
+    }
+    const res = await fetch(path, opts);
+    if (res.status === 204) return null;
+    return res.json();
   }
 
-  function save(items) { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); }
-
-  function render(filter = '') {
-    const items = load();
-    const term = filter.toLowerCase();
-    const filtered = term ? items.filter(i => i.text.toLowerCase().includes(term)) : items;
-
-    if (filtered.length === 0) {
-      list.innerHTML = `<li class="empty">${term ? '没有匹配的事项' : '暂无事项，在上方输入添加'}</li>`;
+  async function render(filter = '') {
+    const items = await request('GET', filter ? `/api/todos?q=${encodeURIComponent(filter)}` : '/api/todos');
+    if (items.length === 0) {
+      list.innerHTML = `<li class="empty">${filter ? '没有匹配的事项' : '暂无事项，在上方输入添加'}</li>`;
     } else {
-      list.innerHTML = filtered.map(i => `
+      list.innerHTML = items.map(i => `
         <li class="${i.done ? 'done' : ''}" data-id="${i.id}">
-          <input type="checkbox" ${i.done ? 'checked' : ''} onchange="toggle(${i.id})">
+          <input type="checkbox" ${i.done ? 'checked' : ''} onchange="toggle(${i.id}, this.checked)">
           <span>${escapeHtml(i.text)}</span>
           <button onclick="remove(${i.id})" title="删除">&times;</button>
         </li>
       `).join('');
     }
-
-    const total = items.length;
-    const done = items.filter(i => i.done).length;
-    stats.textContent = total ? `共 ${total} 项，已完成 ${done} 项` : '';
+    const all = await request('GET', '/api/todos');
+    const done = all.filter(i => i.done).length;
+    stats.textContent = all.length ? `共 ${all.length} 项，已完成 ${done} 项` : '';
   }
 
   function escapeHtml(s) {
@@ -78,25 +77,21 @@
     return d.innerHTML;
   }
 
-  function add() {
+  async function add() {
     const text = search.value.trim();
     if (!text) return;
-    const items = load();
-    items.unshift({ id: Date.now(), text, done: false });
-    save(items);
+    await request('POST', '/api/todos', { text });
     search.value = '';
     render();
   }
 
-  window.toggle = function(id) {
-    const items = load();
-    const item = items.find(i => i.id === id);
-    if (item) { item.done = !item.done; save(items); render(search.value); }
+  window.toggle = async function(id, done) {
+    await request('PUT', `/api/todos/${id}`, { done });
+    render(search.value);
   };
 
-  window.remove = function(id) {
-    const items = load().filter(i => i.id !== id);
-    save(items);
+  window.remove = async function(id) {
+    await request('DELETE', `/api/todos/${id}`);
     render(search.value);
   };
 
