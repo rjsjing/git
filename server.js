@@ -1,11 +1,27 @@
 const express = require('express');
+const fs = require('fs');
+const path = require('path');
 
 const app = express();
 app.use(express.json());
 app.use(express.static('public'));
 
-let todos = [];
-let nextId = 1;
+const DATA_FILE = path.join(__dirname, 'data.json');
+
+function readData() {
+  try {
+    return JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
+  } catch {
+    return [];
+  }
+}
+
+function writeData(data) {
+  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf-8');
+}
+
+let todos = readData();
+let nextId = todos.length ? Math.max(...todos.map(t => t.id)) + 1 : 1;
 
 // 获取所有事项（支持 ?q= 搜索）
 app.get('/api/todos', (req, res) => {
@@ -28,6 +44,7 @@ app.post('/api/todos', (req, res) => {
   }
   const todo = { id: nextId++, text: text.trim(), done: false };
   todos.unshift(todo);
+  writeData(todos);
   res.status(201).json(todo);
 });
 
@@ -38,6 +55,7 @@ app.put('/api/todos/:id', (req, res) => {
   const { text, done } = req.body;
   if (text !== undefined) todo.text = text.trim();
   if (done !== undefined) todo.done = Boolean(done);
+  writeData(todos);
   res.json(todo);
 });
 
@@ -46,6 +64,7 @@ app.delete('/api/todos/:id', (req, res) => {
   const idx = todos.findIndex(t => t.id === Number(req.params.id));
   if (idx === -1) return res.status(404).json({ error: 'Not found' });
   todos.splice(idx, 1);
+  writeData(todos);
   res.status(204).send();
 });
 
