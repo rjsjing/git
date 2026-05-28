@@ -42,33 +42,31 @@
   const search = document.getElementById('search');
   const stats = document.getElementById('stats');
 
-  async function request(method, path, body) {
-    const opts = { method, headers: {} };
-    if (body) {
-      opts.headers['Content-Type'] = 'application/json';
-      opts.body = JSON.stringify(body);
-    }
-    const res = await fetch(path, opts);
-    if (res.status === 204) return null;
+  async function load() {
+    const res = await fetch('/api/todos');
     return res.json();
   }
 
   async function render(filter = '') {
-    const items = await request('GET', filter ? `/api/todos?q=${encodeURIComponent(filter)}` : '/api/todos');
-    if (items.length === 0) {
-      list.innerHTML = `<li class="empty">${filter ? '没有匹配的事项' : '暂无事项，在上方输入添加'}</li>`;
+    const items = await load();
+    const term = filter.toLowerCase();
+    const filtered = term ? items.filter(i => i.text.toLowerCase().includes(term)) : items;
+
+    if (filtered.length === 0) {
+      list.innerHTML = `<li class="empty">${term ? '没有匹配的事项' : '暂无事项，在上方输入添加'}</li>`;
     } else {
-      list.innerHTML = items.map(i => `
+      list.innerHTML = filtered.map(i => `
         <li class="${i.done ? 'done' : ''}" data-id="${i.id}">
-          <input type="checkbox" ${i.done ? 'checked' : ''} onchange="toggle(${i.id}, this.checked)">
+          <input type="checkbox" ${i.done ? 'checked' : ''} onchange="toggle(${i.id})">
           <span>${escapeHtml(i.text)}</span>
           <button onclick="remove(${i.id})" title="删除">&times;</button>
         </li>
       `).join('');
     }
-    const all = await request('GET', '/api/todos');
-    const done = all.filter(i => i.done).length;
-    stats.textContent = all.length ? `共 ${all.length} 项，已完成 ${done} 项` : '';
+
+    const total = items.length;
+    const done = items.filter(i => i.done).length;
+    stats.textContent = total ? `共 ${total} 项，已完成 ${done} 项` : '';
   }
 
   function escapeHtml(s) {
@@ -80,18 +78,28 @@
   async function add() {
     const text = search.value.trim();
     if (!text) return;
-    await request('POST', '/api/todos', { text });
+    await fetch('/api/todos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text })
+    });
     search.value = '';
     render();
   }
 
-  window.toggle = async function(id, done) {
-    await request('PUT', `/api/todos/${id}`, { done });
+  window.toggle = async function(id) {
+    const item = (await load()).find(i => i.id === id);
+    if (!item) return;
+    await fetch(`/api/todos/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ done: !item.done })
+    });
     render(search.value);
   };
 
   window.remove = async function(id) {
-    await request('DELETE', `/api/todos/${id}`);
+    await fetch(`/api/todos/${id}`, { method: 'DELETE' });
     render(search.value);
   };
 
