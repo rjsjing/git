@@ -4,7 +4,7 @@ const path = require('path');
 
 const app = express();
 app.use(express.json());
-app.use(express.static('public'));
+app.use(express.static('public', { index: 'todo.html' }));
 
 const DATA_FILE = path.join(__dirname, 'data.json');
 
