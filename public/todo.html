@@ -7,44 +7,165 @@
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f2f5; display: flex; justify-content: center; padding-top: 60px; min-height: 100vh; }
-  .container { width: 480px; max-width: 95vw; }
-  h1 { text-align: center; color: #1a1a1a; margin-bottom: 24px; font-size: 28px; }
-  .toolbar { display: flex; gap: 8px; margin-bottom: 16px; }
-  .toolbar input { flex: 1; padding: 10px 14px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px; outline: none; transition: border-color 0.2s; }
-  .toolbar input:focus { border-color: #4a90d9; }
-  .toolbar button { padding: 10px 20px; background: #4a90d9; color: #fff; border: none; border-radius: 8px; font-size: 15px; cursor: pointer; transition: background 0.2s; }
+
+  /* 登录 */
+  .login-card { width: 360px; max-width: 90vw; background: #fff; border-radius: 12px; padding: 40px 32px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); text-align: center; }
+  .login-card h1 { margin-bottom: 24px; color: #1a1a1a; font-size: 24px; }
+  .login-card input { width: 100%; padding: 10px 14px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px; outline: none; margin-bottom: 16px; transition: border-color 0.2s; }
+  .login-card input:focus { border-color: #4a90d9; }
+  .login-card button { width: 100%; padding: 10px 0; background: #4a90d9; color: #fff; border: none; border-radius: 8px; font-size: 15px; cursor: pointer; transition: background 0.2s; }
+  .login-card button:hover { background: #357abd; }
+  .login-error { color: #cc4444; font-size: 14px; margin-top: 12px; min-height: 20px; }
+
+  /* 主界面 */
+  .container { width: 520px; max-width: 95vw; }
+  .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+  .header h1 { color: #1a1a1a; font-size: 28px; margin: 0; }
+  .logout-btn { padding: 6px 16px; background: none; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; color: #666; cursor: pointer; transition: all 0.2s; }
+  .logout-btn:hover { border-color: #cc4444; color: #cc4444; }
+  .toolbar { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .toolbar input[type="text"] { flex: 1; min-width: 120px; padding: 10px 14px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px; outline: none; transition: border-color 0.2s; }
+  .toolbar input[type="text"]:focus { border-color: #4a90d9; }
+  .toolbar select { padding: 10px 8px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; outline: none; background: #fff; cursor: pointer; }
+  .toolbar select:focus { border-color: #4a90d9; }
+  .toolbar input[type="date"] { padding: 10px 8px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; outline: none; }
+  .toolbar input[type="date"]:focus { border-color: #4a90d9; }
+  .toolbar button { padding: 10px 20px; background: #4a90d9; color: #fff; border: none; border-radius: 8px; font-size: 15px; cursor: pointer; transition: background 0.2s; white-space: nowrap; }
   .toolbar button:hover { background: #357abd; }
+
+  /* 标签筛选 */
+  .tag-filters { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+  .tag-filters button { padding: 4px 14px; border: 1px solid #d0d0d0; border-radius: 20px; font-size: 13px; background: #fff; color: #555; cursor: pointer; transition: all 0.2s; }
+  .tag-filters button:hover { border-color: #4a90d9; color: #4a90d9; }
+  .tag-filters button.active { background: #4a90d9; color: #fff; border-color: #4a90d9; }
+
+  /* 列表 */
   .list { list-style: none; }
-  .list li { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: #fff; border-radius: 8px; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); animation: fadeIn 0.2s; }
+  .list li { display: flex; align-items: center; gap: 8px; padding: 12px 14px; background: #fff; border-radius: 8px; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); animation: fadeIn 0.2s; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
-  .list li.done span { text-decoration: line-through; color: #aaa; }
-  .list li span { flex: 1; font-size: 15px; word-break: break-word; }
-  .list li input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; accent-color: #4a90d9; }
-  .list li button { background: none; border: none; color: #cc4444; font-size: 18px; cursor: pointer; padding: 0 4px; line-height: 1; }
-  .list li button:hover { color: #aa2222; }
+  .list li.done span.text { text-decoration: line-through; color: #aaa; }
+  .list li span.text { flex: 1; font-size: 15px; word-break: break-word; }
+  .list li input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; accent-color: #4a90d9; flex-shrink: 0; }
+  .list li button.del { background: none; border: none; color: #cc4444; font-size: 18px; cursor: pointer; padding: 0 4px; line-height: 1; flex-shrink: 0; }
+  .list li button.del:hover { color: #aa2222; }
+
+  /* 标签 pill */
+  .tag { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 11px; font-weight: 500; flex-shrink: 0; }
+  .tag-工作 { background: #dbeafe; color: #1e40af; }
+  .tag-个人 { background: #dcfce7; color: #166534; }
+  .tag-学习 { background: #f3e8ff; color: #6b21a8; }
+  .tag-其他 { background: #f3f4f6; color: #6b7280; }
+
+  /* 日期 */
+  .due { font-size: 12px; flex-shrink: 0; }
+  .due-normal { color: #888; }
+  .due-today { color: #e67e22; font-weight: 600; }
+  .due-overdue { color: #cc4444; font-weight: 700; }
+
   .empty { text-align: center; color: #999; padding: 40px 0; font-size: 15px; }
   .stats { text-align: center; color: #888; font-size: 13px; margin-top: 16px; }
+
+  .hidden { display: none !important; }
 </style>
 </head>
 <body>
-<div class="container">
+
+<!-- 登录界面 -->
+<div id="loginPage" class="login-card">
   <h1>待办事项</h1>
+  <input type="password" id="loginPassword" placeholder="请输入密码">
+  <button id="loginBtn">登录</button>
+  <div class="login-error" id="loginError"></div>
+</div>
+
+<!-- 主界面 -->
+<div id="mainPage" class="container hidden">
+  <div class="header">
+    <h1>待办事项</h1>
+    <button class="logout-btn" id="logoutBtn">退出登录</button>
+  </div>
   <div class="toolbar">
     <input type="text" id="search" placeholder="搜索或添加新事项...">
+    <select id="tagSelect">
+      <option value="工作">工作</option>
+      <option value="个人">个人</option>
+      <option value="学习">学习</option>
+      <option value="其他" selected>其他</option>
+    </select>
+    <input type="date" id="datePicker">
     <button id="addBtn">添加</button>
+  </div>
+  <div class="tag-filters" id="tagFilters">
+    <button class="active" data-tag="">全部</button>
+    <button data-tag="工作">工作</button>
+    <button data-tag="个人">个人</button>
+    <button data-tag="学习">学习</button>
+    <button data-tag="其他">其他</button>
   </div>
   <ul class="list" id="list"></ul>
   <div class="stats" id="stats"></div>
 </div>
 
 <script>
+  const loginPage = document.getElementById('loginPage');
+  const mainPage = document.getElementById('mainPage');
+  const loginError = document.getElementById('loginError');
   const list = document.getElementById('list');
   const search = document.getElementById('search');
   const stats = document.getElementById('stats');
+  const tagFilterBtns = document.querySelectorAll('#tagFilters button');
+
+  let currentTag = '';
+
+  function getToken() { return localStorage.getItem('token'); }
+
+  async function api(method, path, body) {
+    const headers = {};
+    const token = getToken();
+    if (token) headers['Authorization'] = 'Bearer ' + token;
+    if (body) headers['Content-Type'] = 'application/json';
+    const res = await fetch(path, { method, headers, body: body ? JSON.stringify(body) : undefined });
+    if (res.status === 401) {
+      localStorage.removeItem('token');
+      showLogin();
+      throw new Error('Unauthorized');
+    }
+    if (res.status === 204) return null;
+    return res.json();
+  }
 
   async function load() {
-    const res = await fetch('/api/todos');
-    return res.json();
+    const qs = [];
+    if (currentTag) qs.push('tag=' + encodeURIComponent(currentTag));
+    const path = '/api/todos' + (qs.length ? '?' + qs.join('&') : '');
+    return api('GET', path);
+  }
+
+  function showLogin() {
+    loginPage.classList.remove('hidden');
+    mainPage.classList.add('hidden');
+    document.getElementById('loginPassword').value = '';
+    loginError.textContent = '';
+  }
+
+  function showMain() {
+    loginPage.classList.add('hidden');
+    mainPage.classList.remove('hidden');
+    render();
+  }
+
+  function formatDate(d) {
+    if (!d) return '';
+    const [y, m, day] = d.split('-');
+    return parseInt(m, 10) + '/' + parseInt(day, 10);
+  }
+
+  function dateClass(dueDate, done) {
+    if (!dueDate || done) return 'due-normal';
+    const today = new Date().toISOString().slice(0, 10);
+    if (dueDate < today) return 'due-overdue';
+    if (dueDate === today) return 'due-today';
+    return 'due-normal';
   }
 
   async function render(filter = '') {
@@ -55,17 +176,25 @@
     if (filtered.length === 0) {
       list.innerHTML = `<li class="empty">${term ? '没有匹配的事项' : '暂无事项，在上方输入添加'}</li>`;
     } else {
-      list.innerHTML = filtered.map(i => `
-        <li class="${i.done ? 'done' : ''}" data-id="${i.id}">
-          <input type="checkbox" ${i.done ? 'checked' : ''} onchange="toggle(${i.id})">
-          <span>${escapeHtml(i.text)}</span>
-          <button onclick="remove(${i.id})" title="删除">&times;</button>
-        </li>
-      `).join('');
+      list.innerHTML = filtered.map(i => {
+        const tagClass = 'tag-' + (i.tag || '其他');
+        const cls = dateClass(i.dueDate, i.done);
+        const dateStr = formatDate(i.dueDate);
+        return `
+          <li class="${i.done ? 'done' : ''}" data-id="${i.id}">
+            <input type="checkbox" ${i.done ? 'checked' : ''} onchange="toggle(${i.id})">
+            <span class="text">${escapeHtml(i.text)}</span>
+            <span class="tag ${tagClass}">${escapeHtml(i.tag || '其他')}</span>
+            ${dateStr ? `<span class="due ${cls}">${dateStr}</span>` : ''}
+            <button class="del" onclick="remove(${i.id})" title="删除">&times;</button>
+          </li>
+        `;
+      }).join('');
     }
 
-    const total = items.length;
-    const done = items.filter(i => i.done).length;
+    const all = await api('GET', '/api/todos');
+    const total = all.length;
+    const done = all.filter(i => i.done).length;
     stats.textContent = total ? `共 ${total} 项，已完成 ${done} 项` : '';
   }
 
@@ -78,36 +207,73 @@
   async function add() {
     const text = search.value.trim();
     if (!text) return;
-    await fetch('/api/todos', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text })
-    });
+    const tag = document.getElementById('tagSelect').value;
+    const dateVal = document.getElementById('datePicker').value;
+    await api('POST', '/api/todos', { text, tag, dueDate: dateVal || null });
     search.value = '';
+    document.getElementById('datePicker').value = '';
     render();
   }
 
   window.toggle = async function(id) {
-    const item = (await load()).find(i => i.id === id);
+    const all = await api('GET', '/api/todos');
+    const item = all.find(i => i.id === id);
     if (!item) return;
-    await fetch(`/api/todos/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ done: !item.done })
-    });
+    await api('PUT', `/api/todos/${id}`, { done: !item.done });
     render(search.value);
   };
 
   window.remove = async function(id) {
-    await fetch(`/api/todos/${id}`, { method: 'DELETE' });
+    await api('DELETE', `/api/todos/${id}`);
     render(search.value);
   };
+
+  // 标签筛选
+  tagFilterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      currentTag = btn.dataset.tag;
+      tagFilterBtns.forEach(b => b.classList.toggle('active', b === btn));
+      render(search.value);
+    });
+  });
+
+  // 登录
+  async function doLogin() {
+    const password = document.getElementById('loginPassword').value;
+    if (!password) return;
+    try {
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+      });
+      if (res.status === 401) {
+        loginError.textContent = '密码错误';
+        return;
+      }
+      const data = await res.json();
+      localStorage.setItem('token', data.token);
+      showMain();
+    } catch {
+      loginError.textContent = '登录失败，请重试';
+    }
+  }
+
+  document.getElementById('loginBtn').addEventListener('click', doLogin);
+  document.getElementById('loginPassword').addEventListener('keydown', e => {
+    if (e.key === 'Enter') doLogin();
+  });
 
   search.addEventListener('input', () => render(search.value));
   search.addEventListener('keydown', e => { if (e.key === 'Enter') add(); });
   document.getElementById('addBtn').addEventListener('click', add);
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    localStorage.removeItem('token');
+    showLogin();
+  });
 
-  render();
+  // 初始化
+  if (getToken()) showMain(); else showLogin();
 </script>
 </body>
 </html>
