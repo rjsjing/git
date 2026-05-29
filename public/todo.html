@@ -97,7 +97,7 @@
     <button id="addBtn">添加</button>
   </div>
   <div class="tag-filters" id="tagFilters">
-    <button class="active" data-tag="">全部</button>
+    <button class="active">全部</button>
     <button data-tag="工作">工作</button>
     <button data-tag="个人">个人</button>
     <button data-tag="学习">学习</button>
@@ -217,6 +217,8 @@
     await api('POST', '/api/todos', { text, tag, dueDate: dateVal || null });
     search.value = '';
     document.getElementById('datePicker').value = '';
+    currentTag = '';
+    tagFilterBtns.forEach(b => b.classList.toggle('active', !b.dataset.tag));
     render();
   }
 
@@ -236,7 +238,7 @@
   // 标签筛选
   tagFilterBtns.forEach(btn => {
     btn.addEventListener('click', () => {
-      currentTag = btn.dataset.tag;
+      currentTag = btn.dataset.tag || '';
       tagFilterBtns.forEach(b => b.classList.toggle('active', b === btn));
       render(search.value);
     });
