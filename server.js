@@ -5,7 +5,14 @@ const crypto = require('crypto');
 
 const app = express();
 app.use(express.json());
-app.use(express.static('public', { index: 'todo.html' }));
+app.use(express.static('public', {
+  index: 'todo.html',
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('/sw.js')) {
+      res.setHeader('Cache-Control', 'no-cache');
+    }
+  }
+}));
 
 const DATA_FILE = path.join(__dirname, 'data.json');
 const TODO_PASSWORD = process.env.TODO_PASSWORD || 'admin123';
